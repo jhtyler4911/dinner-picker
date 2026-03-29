@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dinner Picker</title>
+<style>
+  :root {
+    --ink: #1a1208;
+    --paper: #f5f0e8;
+    --cream: #ede8db;
+    --rule: #c8b89a;
+    --accent: #8b3a2a;
+    --accent-light: #c4664f;
+    --muted: #7a6e5f;
+    --tag-bg: #e8e0d0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: Georgia, serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px 60px;
+  }
+  header { text-align: center; margin-bottom: 44px; }
+  .rule-top { width: 180px; height: 2px; background: var(--accent); margin: 0 auto 18px; }
+  h1 { font-size: 2.4rem; font-weight: 700; }
+  .subtitle { font-style: italic; font-size: 0.95rem; color: var(--muted); margin-top: 8px; }
+  .rule-bottom { width: 100px; height: 1px; background: var(--rule); margin: 16px auto 0; }
+  .card {
+    background: white;
+    border: 1px solid var(--rule);
+    padding: 32px 36px;
+    width: 100%;
+    max-width: 580px;
+  }
+  .section-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+  .hint {
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-style: italic;
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  button {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-appearance: none;
+    appearance: none;
+    font-family: Georgia, serif;
+    cursor: pointer;
+    border-radius: 0;
+  }
+  .cat {
+    background: var(--cream);
+    border: 2px solid var(--rule);
+    padding: 12px 14px;
+    font-size: 0.9rem;
+    color: var(--ink);
+    text-align: left;
+    width: 100%;
+    display: block;
+  }
+  .cat.on { background: var(--accent); border-color: var(--accent); color: white; }
+  .surprise {
+    display: block;
+    width: 100%;
+    background: var(--ink);
+    border: 2px solid var(--ink);
+    padding: 12px 14px;
+    font-size: 0.9rem;
+    font-style: italic;
+    color: var(--paper);
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .surprise.on { background: var(--accent); border-color: var(--accent); }
+  .divider { border: none; border-top: 1px solid var(--rule); margin: 24px 0; }
+  .pick {
+    display: block;
+    width: 100%;
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 16px 20px;
+    font-size: 1rem;
+    letter-spacing: 0.06em;
+  }
+  .pick:active { background: var(--accent-light); }
+  #result { display: none; margin-top: 28px; }
+  .dish-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 10px;
+  }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; }
+  .tag {
+    background: var(--tag-bg);
+    border: 1px solid var(--rule);
+    padding: 3px 9px;
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .reroll {
+    background: transparent;
+    border: 2px solid var(--accent);
+    color: var(--accent);
+    padding: 10px 20px;
+    font-size: 0.85rem;
+    font-style: italic;
+  }
+  .reroll:active { background: var(--accent); color: white; }
+  .nomatch { font-style: italic; color: var(--muted); font-size: 0.9rem; }
+  @media (max-width: 420px) {
+    .card { padding: 24px 16px; }
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="rule-top"></div>
+  <h1>Dinner Picker</h1>
+  <p class="subtitle">What shall we have tonight?</p>
+  <div class="rule-bottom"></div>
+</header>
+
+<div class="card">
+  <p class="section-label">Choose up to two categories</p>
+  <p class="hint">Pick one for a random dish, or two for dishes that appear in both. Surprise Me picks from everything.</p>
+
+  <button class="surprise" id="b-all" onclick="tap('__all__')">&#10022; Surprise Me &mdash; pick from everything</button>
+
+  <div class="grid">
+    <button class="cat" id="b-Asian"  onclick="tap('Asian')">Asian</button>
+    <button class="cat" id="b-Bowls"  onclick="tap('Bowls')">Bowls</button>
+    <button class="cat" id="b-Easy"   onclick="tap('Easy')">Easy</button>
+    <button class="cat" id="b-Favs"   onclick="tap('Favorites')">Favorites</button>
+    <button class="cat" id="b-Fish"   onclick="tap('Fish')">Fish</button>
+    <button class="cat" id="b-Birds"  onclick="tap('Game Birds')">Game Birds</button>
+    <button class="cat" id="b-Grill"  onclick="tap('Grill')">Grill</button>
+    <button class="cat" id="b-Ital"   onclick="tap('Italian')">Italian</button>
+    <button class="cat" id="b-Mex"    onclick="tap('Mexican/Southwestern')">Mexican/Southwestern</button>
+    <button class="cat" id="b-Soups"  onclick="tap('Soups')">Soups</button>
+    <button class="cat" id="b-Veggie" onclick="tap('Veggie')">Veggie</button>
+    <button class="cat" id="b-Venis"  onclick="tap('Venison')">Venison</button>
+  </div>
+
+  <div class="divider"></div>
+  <button class="pick" onclick="pick()">Pick My Dinner</button>
+
+  <div id="result">
+    <div class="divider"></div>
+    <p class="section-label">Tonight's dinner</p>
+    <div class="dish-name" id="dishName"></div>
+    <div class="tags" id="dishTags"></div>
+    <button class="reroll" onclick="pick()">Try another &rarr;</button>
+  </div>
+</div>
+
+<script>
+// Map from category name to button id
+var BTN = {
+  '__all__':               'b-all',
+  'Asian':                 'b-Asian',
+  'Bowls':                 'b-Bowls',
+  'Easy':                  'b-Easy',
+  'Favorites':             'b-Favs',
+  'Fish':                  'b-Fish',
+  'Game Birds':            'b-Birds',
+  'Grill':                 'b-Grill',
+  'Italian':               'b-Ital',
+  'Mexican/Southwestern':  'b-Mex',
+  'Soups':                 'b-Soups',
+  'Veggie':                'b-Veggie',
+  'Venison':               'b-Venis'
+};
+
+var dishes = [
+  {n:"Hoisin Lettuce Wraps",                                              t:["Asian"]},
+  {n:"Wild Turkey Thigh Coconut Curry",                                   t:["Asian","Game Birds"]},
+  {n:"Kimchi Venison Lettuce Wraps",                                      t:["Asian","Venison"]},
+  {n:"Pheasant Coconut Curry NYT",                                        t:["Asian","Game Birds"]},
+  {n:"Chinese Orange Chicken",                                            t:["Asian"]},
+  {n:"Wild Turkey Coconut Curry",                                         t:["Asian","Game Birds"]},
+  {n:"Kung Pao Pheasant",                                                 t:["Asian","Game Birds"]},
+  {n:"Coconut Curry Fish NYT",                                            t:["Asian","Fish","Easy"]},
+  {n:"Three Cup Pheasant NYT",                                            t:["Asian","Game Birds"]},
+  {n:"Spicy Turkey (Venison) Stir-Fry with Crisp Garlic and Ginger NYT", t:["Asian","Game Birds","Venison"]},
+  {n:"Beef (Venison) Fried Rice NYT",                                     t:["Asian","Venison"]},
+  {n:"Southwest Pheasant Rice Bowl",                                      t:["Bowls","Game Birds","Mexican/Southwestern"]},
+  {n:"Burrito Bowl NYT",                                                  t:["Bowls","Mexican/Southwestern"]},
+  {n:"Swiss Chard Rice Bowl with Chorizo NYT",                            t:["Bowls"]},
+  {n:"Kimchi Lettuce Wraps",                                              t:["Easy"]},
+  {n:"Snack Dinner",                                                      t:["Easy","Favorites"]},
+  {n:"Pan Saute Trout",                                                   t:["Easy","Fish"]},
+  {n:"Grilled Trout",                                                     t:["Easy","Fish","Grill"]},
+  {n:"Simple Salmon",                                                     t:["Easy","Fish"]},
+  {n:"Steakhouse Goose",                                                  t:["Easy","Game Birds"]},
+  {n:"Rice and Beans",                                                    t:["Easy"]},
+  {n:"Omelettes",                                                         t:["Easy"]},
+  {n:"Grilled Cheese Sandwiches",                                         t:["Easy"]},
+  {n:"Panini Sandwiches",                                                 t:["Easy"]},
+  {n:"Big Salad",                                                         t:["Easy"]},
+  {n:"Spicy, Creamy Weeknight Bolognese NYT",                             t:["Easy","Italian","Venison"]},
+  {n:"Honey Garlic Shrimp NYT",                                           t:["Easy","Fish"]},
+  {n:"Cheese Quesadillas",                                                t:["Easy","Mexican/Southwestern"]},
+  {n:"New Mexican Hot Dish NYT",                                          t:["Easy","Mexican/Southwestern"]},
+  {n:"Pan Cooked Venison Steaks",                                         t:["Favorites","Venison"]},
+  {n:"Chicken-Fried Venison Steak with Red Chile Gravy",                  t:["Favorites","Venison"]},
+  {n:"Sharptail or Pheasant Kabobs",                                      t:["Favorites","Game Birds","Grill"]},
+  {n:"Portuguese Soup (Caldo Verde)",                                     t:["Favorites","Soups"]},
+  {n:"Spaghetti and Venison Meatballs",                                   t:["Favorites","Italian","Venison"]},
+  {n:"Roasted Turkey Breast with Asparagus",                              t:["Favorites","Game Birds"]},
+  {n:"Fish Tacos NYT",                                                    t:["Fish","Mexican/Southwestern"]},
+  {n:"Spatchcocked Pellet-Grilled Pheasant",                              t:["Game Birds","Grill"]},
+  {n:"Skinned Goose Leg Confit for Two",                                  t:["Game Birds"]},
+  {n:"Pheasant or Duck Confit",                                           t:["Game Birds","Favorites"]},
+  {n:"Pan Cooked Huns",                                                   t:["Game Birds"]},
+  {n:"Pan Cooked Quail",                                                  t:["Game Birds"]},
+  {n:"Pan Cooked Woodcock",                                               t:["Game Birds"]},
+  {n:"Turkey Breast Schnitzel",                                           t:["Game Birds"]},
+  {n:"Pheasant, Potato, and Leek Casserole",                              t:["Game Birds"]},
+  {n:"Tequila Turkey Tacos",                                              t:["Game Birds","Mexican/Southwestern"]},
+  {n:"Grilled Pheasant",                                                  t:["Game Birds","Grill"]},
+  {n:"Grilled Quail or Huns",                                             t:["Game Birds","Grill"]},
+  {n:"Venison Burgers",                                                   t:["Venison","Grill","Favorites"]},
+  {n:"Classic Carbonara",                                                 t:["Italian"]},
+  {n:"Venison Tacos",                                                     t:["Venison","Mexican/Southwestern"]},
+  {n:"Bracy Hills Venison Meatballs",                                     t:["Venison","Favorites"]},
+  {n:"Smoked Venison Meatballs",                                          t:["Venison"]},
+  {n:"Bracy Hills Venison Chili",                                         t:["Venison","Soups"]},
+  {n:"Sous Vide Venison Backstrap or Loin",                               t:["Venison","Favorites"]},
+  {n:"Venison Oklahoma Burgers",                                          t:["Venison","Grill"]},
+  {n:"Crispy Chickpeas with Beef (Venison) NYT",                          t:["Venison"]},
+  {n:"Venison Meatball Soup",                                             t:["Soups","Venison"]},
+  {n:"French Onion Soup",                                                 t:["Soups"]},
+  {n:"Ratatouille",                                                       t:["Veggie"]},
+  {n:"Sheet-Pan Ratatouille With Crispy Chickpeas NYT",                   t:["Veggie"]},
+  {n:"Cabbage and Egg Pancake (Okonomiyaki) NYT",                         t:["Veggie","Easy"]}
+];
+
+var sel = [];
+var lastPick = null;
+
+function tap(cat) {
+  var allKeys = Object.keys(BTN);
+
+  if (cat === '__all__') {
+    sel = ['__all__'];
+    for (var i = 0; i < allKeys.length; i++) {
+      var el = document.getElementById(BTN[allKeys[i]]);
+      if (el) el.className = el.className.replace(' on','');
+    }
+    var surp = document.getElementById('b-all');
+    if (surp && surp.className.indexOf(' on') === -1) surp.className += ' on';
+    return;
+  }
+
+  // Clear surprise
+  if (sel.indexOf('__all__') !== -1) {
+    sel = [];
+    var surpEl = document.getElementById('b-all');
+    if (surpEl) surpEl.className = surpEl.className.replace(' on','');
+  }
+
+  var idx = sel.indexOf(cat);
+  if (idx !== -1) {
+    // Deselect
+    sel.splice(idx, 1);
+    var el = document.getElementById(BTN[cat]);
+    if (el) el.className = el.className.replace(' on','');
+  } else {
+    // If already 2 selected, drop the first
+    if (sel.length >= 2) {
+      var dropped = sel.shift();
+      var droppedEl = document.getElementById(BTN[dropped]);
+      if (droppedEl) droppedEl.className = droppedEl.className.replace(' on','');
+    }
+    sel.push(cat);
+    var addEl = document.getElementById(BTN[cat]);
+    if (addEl && addEl.className.indexOf(' on') === -1) addEl.className += ' on';
+  }
+}
+
+function pick() {
+  if (sel.length === 0) {
+    alert('Please choose at least one category, or tap Surprise Me.');
+    return;
+  }
+
+  var pool = [];
+  for (var i = 0; i < dishes.length; i++) {
+    var d = dishes[i];
+    if (sel.indexOf('__all__') !== -1) {
+      pool.push(d);
+    } else {
+      var match = true;
+      for (var j = 0; j < sel.length; j++) {
+        if (d.t.indexOf(sel[j]) === -1) { match = false; break; }
+      }
+      if (match) pool.push(d);
+    }
+  }
+
+  if (pool.length === 0) {
+    document.getElementById('dishName').innerHTML = '<span class="nomatch">No dishes match both categories. Try a different combination.</span>';
+    document.getElementById('dishTags').innerHTML = '';
+    document.getElementById('result').style.display = 'block';
+    return;
+  }
+
+  var candidate;
+  if (pool.length > 1 && lastPick) {
+    var filtered = [];
+    for (var k = 0; k < pool.length; k++) {
+      if (pool[k].n !== lastPick) filtered.push(pool[k]);
+    }
+    candidate = filtered.length > 0 ? filtered[Math.floor(Math.random() * filtered.length)] : pool[Math.floor(Math.random() * pool.length)];
+  } else {
+    candidate = pool[Math.floor(Math.random() * pool.length)];
+  }
+
+  lastPick = candidate.n;
+  document.getElementById('dishName').textContent = candidate.n;
+
+  var tagsHtml = '';
+  for (var m = 0; m < candidate.t.length; m++) {
+    tagsHtml += '<span class="tag">' + candidate.t[m] + '</span>';
+  }
+  document.getElementById('dishTags').innerHTML = tagsHtml;
+  document.getElementById('result').style.display = 'block';
+}
+</script>
+</body>
+</html>
