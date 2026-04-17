@@ -32,7 +32,7 @@
   h1 { font-size: 2.4rem; font-weight: 700; }
   .subtitle { font-style: italic; font-size: 0.95rem; color: var(--muted); margin-top: 8px; }
   .rule-bottom { width: 100px; height: 1px; background: var(--rule); margin: 16px auto 0; }
-
+ 
   .card {
     background: white;
     border: 1px solid var(--rule);
@@ -131,7 +131,7 @@
   }
   .reroll:active { background: var(--accent); color: white; }
   .nomatch { font-style: italic; color: var(--muted); font-size: 0.9rem; }
-
+ 
   /* Manage link */
   .manage-link {
     text-align: center;
@@ -149,7 +149,7 @@
     padding: 4px;
   }
   .manage-link button:hover { color: var(--accent); }
-
+ 
   /* ── Manage Meals card ── */
   #manage-card {
     display: none;
@@ -165,7 +165,7 @@
     font-weight: 700;
     margin-bottom: 6px;
   }
-
+ 
   /* Add meal */
   .add-row {
     display: flex;
@@ -197,7 +197,7 @@
     white-space: nowrap;
   }
   .btn-add:active { background: var(--accent-light); }
-
+ 
   /* Meal list */
   .meal-list { list-style: none; margin-bottom: 4px; }
   .meal-list li {
@@ -226,7 +226,7 @@
   }
   .meal-list li button.del-meal:hover { color: var(--danger); }
   .empty-note { font-style: italic; color: var(--muted); font-size: 0.82rem; padding: 8px 0; }
-
+ 
   /* ── Category management ── */
   #cat-card {
     display: none;
@@ -258,7 +258,7 @@
     font-style: italic;
     flex-shrink: 0;
   }
-
+ 
   /* inline rename input */
   .cat-list li input.rename-input {
     font-family: Georgia, serif;
@@ -271,7 +271,7 @@
     flex: 1;
   }
   .cat-list li input.rename-input:focus { outline: none; }
-
+ 
   .btn-rename {
     background: none;
     border: 1px solid var(--rule);
@@ -301,7 +301,7 @@
     flex-shrink: 0;
   }
   .btn-del-cat:hover { color: var(--danger); }
-
+ 
   .add-cat-row {
     display: flex;
     gap: 8px;
@@ -329,7 +329,7 @@
     white-space: nowrap;
   }
   .btn-add-cat:active { background: var(--accent-light); }
-
+ 
   .sub-label {
     font-size: 0.65rem;
     letter-spacing: 0.15em;
@@ -338,7 +338,7 @@
     margin-bottom: 10px;
     margin-top: 18px;
   }
-
+ 
   .close-btn {
     background: none;
     border: none;
@@ -353,7 +353,7 @@
     display: block;
   }
   .close-btn:hover { color: var(--accent); }
-
+ 
   /* management nav */
   .mgmt-nav {
     display: flex;
@@ -376,7 +376,7 @@
     border-color: var(--accent);
     color: var(--accent);
   }
-
+ 
   @media (max-width: 420px) {
     .card, #manage-card, #cat-card { padding: 24px 16px; }
     .grid { grid-template-columns: 1fr; }
@@ -385,28 +385,28 @@
 </style>
 </head>
 <body>
-
+ 
 <header>
   <div class="rule-top"></div>
   <h1>Dinner Picker</h1>
   <p class="subtitle">What shall we have tonight?</p>
   <div class="rule-bottom"></div>
 </header>
-
+ 
 <!-- ── Main picker card ── -->
 <div class="card">
   <p class="section-label">Choose up to two categories</p>
   <p class="hint">Pick one for a random dish, or two for dishes that appear in both. Surprise Me picks from everything.</p>
-
+ 
   <button class="surprise" id="b-all" onclick="tap('__all__')">&#10022; Surprise Me &mdash; pick from everything</button>
-
+ 
   <div class="grid" id="cat-grid">
     <!-- rendered by renderCategories() -->
   </div>
-
+ 
   <div class="divider"></div>
   <button class="pick" onclick="pick()">Pick My Dinner</button>
-
+ 
   <div id="result">
     <div class="divider"></div>
     <p class="section-label">Tonight's dinner</p>
@@ -415,18 +415,18 @@
     <button class="reroll" onclick="pick()">Try another &rarr;</button>
   </div>
 </div>
-
+ 
 <!-- management nav links -->
 <div class="mgmt-nav">
   <button id="btn-open-meals" onclick="togglePanel('meals')">&#43; Manage Meals</button>
   <button id="btn-open-cats" onclick="togglePanel('cats')">&#9776; Manage Categories</button>
 </div>
-
+ 
 <!-- ── Manage Meals card ── -->
 <div id="manage-card">
   <h2>Manage Meals</h2>
   <p class="hint" style="margin-bottom:18px;">Add your own meals or remove any meal from the list.</p>
-
+ 
   <p class="sub-label">Add a new meal</p>
   <div class="add-row">
     <input type="text" id="new-meal-name" placeholder="Meal name&hellip;" />
@@ -434,30 +434,30 @@
     <select id="new-meal-cat2"><option value="">+ 2nd category</option></select>
     <button class="btn-add" onclick="addMeal()">Add</button>
   </div>
-
+ 
   <p class="sub-label">All meals</p>
   <ul class="meal-list" id="meal-list"></ul>
-
+ 
   <button class="close-btn" onclick="togglePanel('meals')">Close &uarr;</button>
 </div>
-
+ 
 <!-- ── Manage Categories card ── -->
 <div id="cat-card">
   <h2>Manage Categories</h2>
   <p class="hint" style="margin-bottom:18px;">Add new categories, rename existing ones, or delete empty ones.</p>
-
+ 
   <p class="sub-label">Existing categories</p>
   <ul class="cat-list" id="cat-list"></ul>
-
+ 
   <p class="sub-label">Add a new category</p>
   <div class="add-cat-row">
     <input type="text" id="new-cat-name" placeholder="Category name&hellip;" />
     <button class="btn-add-cat" onclick="addCategory()">Add</button>
   </div>
-
+ 
   <button class="close-btn" onclick="togglePanel('cats')">Close &uarr;</button>
 </div>
-
+ 
 <script>
 // ─────────────────────────────────────────────
 //  Default data
@@ -466,7 +466,7 @@ var DEFAULT_CATEGORIES = [
   "Asian","Bowls","Easy","Favorites","Fish","Game Birds",
   "Grill","Italian","Mexican/Southwestern","Soups","Veggie","Venison"
 ];
-
+ 
 var DEFAULT_DISHES = [
   {n:"Hoisin Lettuce Wraps",                                              t:["Asian"]},
   {n:"Wild Turkey Thigh Coconut Curry",                                   t:["Asian","Game Birds"]},
@@ -530,19 +530,19 @@ var DEFAULT_DISHES = [
   {n:"Sheet-Pan Ratatouille With Crispy Chickpeas NYT",                   t:["Veggie"]},
   {n:"Cabbage and Egg Pancake (Okonomiyaki) NYT",                         t:["Veggie","Easy"]}
 ];
-
+ 
 // ─────────────────────────────────────────────
 //  State — loaded from / saved to localStorage
 // ─────────────────────────────────────────────
 var categories = [];   // array of strings, ordered
 var dishes = [];       // array of {n, t, custom?}
-
+ 
 function loadState() {
   try {
     var savedCats = localStorage.getItem('dp_categories');
     categories = savedCats ? JSON.parse(savedCats) : DEFAULT_CATEGORIES.slice();
   } catch(e) { categories = DEFAULT_CATEGORIES.slice(); }
-
+ 
   try {
     var savedDishes = localStorage.getItem('dp_dishes');
     if (savedDishes) {
@@ -554,20 +554,20 @@ function loadState() {
     dishes = DEFAULT_DISHES.map(function(d){ return {n:d.n, t:d.t.slice()}; });
   }
 }
-
+ 
 function saveState() {
   try {
     localStorage.setItem('dp_categories', JSON.stringify(categories));
     localStorage.setItem('dp_dishes', JSON.stringify(dishes));
   } catch(e) {}
 }
-
+ 
 // ─────────────────────────────────────────────
 //  Picker state
 // ─────────────────────────────────────────────
 var sel = [];
 var lastPick = null;
-
+ 
 // ─────────────────────────────────────────────
 //  Render category buttons
 // ─────────────────────────────────────────────
@@ -584,7 +584,7 @@ function renderCategories() {
     grid.appendChild(btn);
   }
 }
-
+ 
 // ─────────────────────────────────────────────
 //  Category selection
 // ─────────────────────────────────────────────
@@ -596,14 +596,14 @@ function tap(cat) {
     if (surp.className.indexOf(' on') === -1) surp.className += ' on';
     return;
   }
-
+ 
   // Clear surprise
   if (sel.indexOf('__all__') !== -1) {
     sel = [];
     var surpEl = document.getElementById('b-all');
     surpEl.className = surpEl.className.replace(' on','');
   }
-
+ 
   var idx = sel.indexOf(cat);
   if (idx !== -1) {
     sel.splice(idx, 1);
@@ -613,7 +613,7 @@ function tap(cat) {
   }
   renderCategories();
 }
-
+ 
 // ─────────────────────────────────────────────
 //  Pick
 // ─────────────────────────────────────────────
@@ -635,14 +635,14 @@ function pick() {
       if (match) pool.push(d);
     }
   }
-
+ 
   if (pool.length === 0) {
     document.getElementById('dishName').innerHTML = '<span class="nomatch">No dishes match both categories. Try a different combination.</span>';
     document.getElementById('dishTags').innerHTML = '';
     document.getElementById('result').style.display = 'block';
     return;
   }
-
+ 
   var candidate;
   if (pool.length > 1 && lastPick) {
     var filtered = pool.filter(function(x){ return x.n !== lastPick; });
@@ -652,10 +652,10 @@ function pick() {
   } else {
     candidate = pool[Math.floor(Math.random() * pool.length)];
   }
-
+ 
   lastPick = candidate.n;
   document.getElementById('dishName').textContent = candidate.n;
-
+ 
   var tagsHtml = '';
   for (var m = 0; m < candidate.t.length; m++) {
     tagsHtml += '<span class="tag">' + esc(candidate.t[m]) + '</span>';
@@ -663,7 +663,7 @@ function pick() {
   document.getElementById('dishTags').innerHTML = tagsHtml;
   document.getElementById('result').style.display = 'block';
 }
-
+ 
 // ─────────────────────────────────────────────
 //  Manage panels toggle
 // ─────────────────────────────────────────────
@@ -672,7 +672,7 @@ function togglePanel(which) {
   var cats  = document.getElementById('cat-card');
   var btnMeals = document.getElementById('btn-open-meals');
   var btnCats  = document.getElementById('btn-open-cats');
-
+ 
   if (which === 'meals') {
     var open = meals.style.display === 'block';
     meals.style.display = open ? 'none' : 'block';
@@ -689,7 +689,7 @@ function togglePanel(which) {
     if (!openC) renderManageCategories();
   }
 }
-
+ 
 // ─────────────────────────────────────────────
 //  Manage Meals
 // ─────────────────────────────────────────────
@@ -704,14 +704,14 @@ function populateCatDropdowns() {
     o1.value = categories[i]; o1.textContent = categories[i];
     if (categories[i] === v1) o1.selected = true;
     sel1.appendChild(o1);
-
+ 
     var o2 = document.createElement('option');
     o2.value = categories[i]; o2.textContent = categories[i];
     if (categories[i] === v2) o2.selected = true;
     sel2.appendChild(o2);
   }
 }
-
+ 
 function renderManageMeals() {
   populateCatDropdowns();
   var list = document.getElementById('meal-list');
@@ -740,7 +740,7 @@ function renderManageMeals() {
     })(sorted[i]);
   }
 }
-
+ 
 function addMeal() {
   var nameEl = document.getElementById('new-meal-name');
   var cat1El = document.getElementById('new-meal-cat1');
@@ -748,57 +748,57 @@ function addMeal() {
   var name = nameEl.value.trim();
   var c1   = cat1El.value;
   var c2   = cat2El.value;
-
+ 
   if (!name) { alert('Please enter a meal name.'); nameEl.focus(); return; }
   if (!c1)   { alert('Please choose at least one category.'); cat1El.focus(); return; }
   if (c2 && c2 === c1) { alert('Please choose two different categories.'); cat2El.focus(); return; }
-
+ 
   var duplicate = dishes.some(function(d){ return d.n.toLowerCase() === name.toLowerCase(); });
   if (duplicate) { alert('A meal with that name already exists.'); nameEl.focus(); return; }
-
+ 
   var tags = [c1];
   if (c2) tags.push(c2);
   dishes.push({n: name, t: tags, custom: true});
   saveState();
-
+ 
   nameEl.value = '';
   cat1El.value = '';
   cat2El.value = '';
   renderManageMeals();
 }
-
+ 
 // ─────────────────────────────────────────────
 //  Manage Categories
 // ─────────────────────────────────────────────
 function renderManageCategories() {
   var list = document.getElementById('cat-list');
   list.innerHTML = '';
-
+ 
   for (var i = 0; i < categories.length; i++) {
     (function(cat) {
       var count = dishes.filter(function(d){ return d.t.indexOf(cat) !== -1; }).length;
       var li = document.createElement('li');
-
+ 
       // normal view
       var nameSpan = document.createElement('span');
       nameSpan.className = 'cat-name-text';
       nameSpan.textContent = cat;
-
+ 
       var countSpan = document.createElement('span');
       countSpan.className = 'cat-count';
       countSpan.textContent = count + (count === 1 ? ' meal' : ' meals');
-
+ 
       var renameBtn = document.createElement('button');
       renameBtn.className = 'btn-rename';
       renameBtn.textContent = 'Rename';
       renameBtn.onclick = function() { startRename(li, cat, nameSpan, renameBtn, countSpan, delBtn); };
-
+ 
       var delBtn = document.createElement('button');
       delBtn.className = 'btn-del-cat';
       delBtn.title = 'Delete category';
       delBtn.innerHTML = '&times;';
       delBtn.onclick = function() { deleteCategory(cat); };
-
+ 
       li.appendChild(nameSpan);
       li.appendChild(countSpan);
       li.appendChild(renameBtn);
@@ -806,29 +806,29 @@ function renderManageCategories() {
       list.appendChild(li);
     })(categories[i]);
   }
-
+ 
   // also refresh category dropdowns in meal manager if open
   if (document.getElementById('manage-card').style.display === 'block') {
     populateCatDropdowns();
   }
 }
-
+ 
 function startRename(li, oldName, nameSpan, renameBtn, countSpan, delBtn) {
   var input = document.createElement('input');
   input.className = 'rename-input';
   input.value = oldName;
   input.type = 'text';
-
+ 
   var okBtn = document.createElement('button');
   okBtn.className = 'btn-rename-ok';
   okBtn.textContent = 'Save';
-
+ 
   li.innerHTML = '';
   li.appendChild(input);
   li.appendChild(okBtn);
   input.focus();
   input.select();
-
+ 
   function doRename() {
     var newName = input.value.trim();
     if (!newName) { alert('Category name cannot be empty.'); input.focus(); return; }
@@ -851,21 +851,21 @@ function startRename(li, oldName, nameSpan, renameBtn, countSpan, delBtn) {
     renderCategories();
     renderManageCategories();
   }
-
+ 
   okBtn.onclick = doRename;
   input.onkeydown = function(e) {
     if (e.key === 'Enter') doRename();
     if (e.key === 'Escape') renderManageCategories();
   };
 }
-
+ 
 function deleteCategory(cat) {
   var count = dishes.filter(function(d){ return d.t.indexOf(cat) !== -1; }).length;
   var msg = count > 0
     ? 'Delete "' + cat + '"? It is used by ' + count + ' meal(s). Those meals will lose this category tag.'
     : 'Delete category "' + cat + '"?';
   if (!confirm(msg)) return;
-
+ 
   categories = categories.filter(function(c){ return c !== cat; });
   // Strip tag from dishes; remove dish if it would have no categories
   for (var i = dishes.length - 1; i >= 0; i--) {
@@ -874,7 +874,7 @@ function deleteCategory(cat) {
   }
   // Remove from selection
   sel = sel.filter(function(s){ return s !== cat; });
-
+ 
   saveState();
   renderCategories();
   renderManageCategories();
@@ -882,7 +882,7 @@ function deleteCategory(cat) {
     renderManageMeals();
   }
 }
-
+ 
 function addCategory() {
   var input = document.getElementById('new-cat-name');
   var name = input.value.trim();
@@ -897,7 +897,7 @@ function addCategory() {
     populateCatDropdowns();
   }
 }
-
+ 
 // ─────────────────────────────────────────────
 //  Utility
 // ─────────────────────────────────────────────
@@ -908,7 +908,7 @@ function esc(str) {
     .replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;');
 }
-
+ 
 // ─────────────────────────────────────────────
 //  Init
 // ─────────────────────────────────────────────
