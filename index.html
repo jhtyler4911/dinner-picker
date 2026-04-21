@@ -201,35 +201,20 @@
   /* Meal list */
   .meal-list { list-style: none; margin-bottom: 4px; }
   .meal-list li {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
     padding: 7px 0;
     border-bottom: 1px solid var(--cream);
     font-size: 0.88rem;
   }
-
-  /* Normal (non-editing) row */
-  .meal-row-view {
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-  }
-  .meal-row-view .meal-name { flex: 1; }
-  .meal-row-view .meal-cats {
+  .meal-list li .meal-name { flex: 1; }
+  .meal-list li .meal-cats {
     font-size: 0.7rem;
     color: var(--muted);
     font-style: italic;
     flex-shrink: 0;
   }
-  .btn-edit-meal {
-    background: none;
-    border: 1px solid var(--rule);
-    color: var(--muted);
-    padding: 2px 8px;
-    font-size: 0.7rem;
-    letter-spacing: 0.06em;
-    flex-shrink: 0;
-    font-family: Georgia, serif;
-  }
-  .btn-edit-meal:hover { border-color: var(--accent); color: var(--accent); }
   .meal-list li button.del-meal {
     background: none;
     border: none;
@@ -241,57 +226,6 @@
   }
   .meal-list li button.del-meal:hover { color: var(--danger); }
   .empty-note { font-style: italic; color: var(--muted); font-size: 0.82rem; padding: 8px 0; }
-
-  /* Inline edit row */
-  .meal-row-edit {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    padding: 6px 0 4px;
-  }
-  .meal-row-edit input,
-  .meal-row-edit select {
-    font-family: Georgia, serif;
-    font-size: 0.85rem;
-    border: 1px solid var(--accent);
-    background: var(--paper);
-    color: var(--ink);
-    padding: 6px 8px;
-    border-radius: 0;
-    width: 100%;
-  }
-  .meal-row-edit input:focus,
-  .meal-row-edit select:focus { outline: none; }
-  .meal-edit-selects {
-    display: flex;
-    gap: 6px;
-  }
-  .meal-edit-selects select { flex: 1; }
-  .meal-edit-actions {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-  }
-  .btn-edit-save {
-    background: var(--accent);
-    border: none;
-    color: white;
-    padding: 4px 12px;
-    font-size: 0.75rem;
-    letter-spacing: 0.06em;
-    font-family: Georgia, serif;
-  }
-  .btn-edit-save:active { background: var(--accent-light); }
-  .btn-edit-cancel {
-    background: none;
-    border: 1px solid var(--rule);
-    color: var(--muted);
-    padding: 4px 10px;
-    font-size: 0.75rem;
-    letter-spacing: 0.06em;
-    font-family: Georgia, serif;
-  }
-  .btn-edit-cancel:hover { border-color: var(--accent); color: var(--accent); }
 
   /* ── Category management ── */
   #cat-card {
@@ -309,16 +243,45 @@
     margin-bottom: 6px;
   }
   .cat-list { list-style: none; margin-bottom: 16px; }
+
+  /* ── Category row header ── */
   .cat-list li {
+    border-bottom: 1px solid var(--cream);
+  }
+  .cat-row-header {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 6px 0;
-    border-bottom: 1px solid var(--cream);
+    padding: 8px 0 8px 0;
     font-size: 0.88rem;
   }
-  .cat-list li .cat-name-text { flex: 1; }
-  .cat-list li .cat-count {
+
+  /* clickable category name */
+  .cat-name-btn {
+    background: none;
+    border: none;
+    font-family: Georgia, serif;
+    font-size: 0.88rem;
+    color: var(--ink);
+    text-align: left;
+    cursor: pointer;
+    flex: 1;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .cat-name-btn:hover .cat-name-text-inner { color: var(--accent); text-decoration: underline; }
+  .cat-expand-arrow {
+    font-size: 0.6rem;
+    color: var(--muted);
+    display: inline-block;
+    transition: transform 0.15s ease;
+    line-height: 1;
+  }
+  .cat-expand-arrow.open { transform: rotate(90deg); }
+
+  .cat-count {
     font-size: 0.7rem;
     color: var(--muted);
     font-style: italic;
@@ -326,7 +289,7 @@
   }
 
   /* inline rename input */
-  .cat-list li input.rename-input {
+  .rename-input {
     font-family: Georgia, serif;
     font-size: 0.88rem;
     border: 1px solid var(--accent);
@@ -336,7 +299,7 @@
     border-radius: 0;
     flex: 1;
   }
-  .cat-list li input.rename-input:focus { outline: none; }
+  .rename-input:focus { outline: none; }
 
   .btn-rename {
     background: none;
@@ -367,6 +330,49 @@
     flex-shrink: 0;
   }
   .btn-del-cat:hover { color: var(--danger); }
+
+  /* ── Expanded meal sub-list ── */
+  .cat-meal-sublist {
+    display: none;
+    list-style: none;
+    margin: 0 0 10px 18px;
+    border-left: 2px solid var(--cream);
+    padding-left: 12px;
+  }
+  .cat-meal-sublist.open { display: block; }
+  .cat-meal-sublist li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 0;
+    border-bottom: 1px solid transparent; /* no double-border with parent */
+    font-size: 0.82rem;
+    color: var(--ink);
+  }
+  .cat-meal-sublist li .sub-meal-name { flex: 1; }
+  .cat-meal-sublist li .sub-meal-othercats {
+    font-size: 0.68rem;
+    color: var(--muted);
+    font-style: italic;
+    flex-shrink: 0;
+  }
+  .btn-untag {
+    background: none;
+    border: none;
+    color: var(--rule);
+    font-size: 0.95rem;
+    line-height: 1;
+    padding: 0 3px;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  .btn-untag:hover { color: var(--danger); }
+  .sub-empty-note {
+    font-style: italic;
+    color: var(--muted);
+    font-size: 0.78rem;
+    padding: 4px 0 6px;
+  }
 
   .add-cat-row {
     display: flex;
@@ -491,7 +497,7 @@
 <!-- ── Manage Meals card ── -->
 <div id="manage-card">
   <h2>Manage Meals</h2>
-  <p class="hint" style="margin-bottom:18px;">Add your own meals, edit existing ones, or remove any meal from the list.</p>
+  <p class="hint" style="margin-bottom:18px;">Add your own meals or remove any meal from the list.</p>
 
   <p class="sub-label">Add a new meal</p>
   <div class="add-row">
@@ -510,7 +516,7 @@
 <!-- ── Manage Categories card ── -->
 <div id="cat-card">
   <h2>Manage Categories</h2>
-  <p class="hint" style="margin-bottom:18px;">Add new categories, rename existing ones, or delete empty ones.</p>
+  <p class="hint" style="margin-bottom:18px;">Click a category name to see its meals. You can rename, delete, or remove individual meals from a category.</p>
 
   <p class="sub-label">Existing categories</p>
   <ul class="cat-list" id="cat-list"></ul>
@@ -634,8 +640,11 @@ function saveState() {
 var sel = [];
 var lastPick = null;
 
+// Track which categories are expanded in the manage panel
+var expandedCats = {};
+
 // ─────────────────────────────────────────────
-//  Render category buttons
+//  Render category buttons (picker)
 // ─────────────────────────────────────────────
 function renderCategories() {
   var grid = document.getElementById('cat-grid');
@@ -652,7 +661,7 @@ function renderCategories() {
 }
 
 // ─────────────────────────────────────────────
-//  Category selection
+//  Category selection (picker)
 // ─────────────────────────────────────────────
 function tap(cat) {
   if (cat === '__all__') {
@@ -777,31 +786,6 @@ function populateCatDropdowns() {
   }
 }
 
-// Build a select element pre-populated with categories, with an optional blank first option
-function buildCatSelect(blankLabel, selectedValue) {
-  var s = document.createElement('select');
-  s.style.fontFamily = 'Georgia, serif';
-  s.style.fontSize = '0.85rem';
-  s.style.border = '1px solid var(--accent)';
-  s.style.background = 'var(--paper)';
-  s.style.color = 'var(--ink)';
-  s.style.padding = '6px 8px';
-  s.style.borderRadius = '0';
-  s.style.flex = '1';
-  var blank = document.createElement('option');
-  blank.value = '';
-  blank.textContent = blankLabel;
-  s.appendChild(blank);
-  for (var i = 0; i < categories.length; i++) {
-    var o = document.createElement('option');
-    o.value = categories[i];
-    o.textContent = categories[i];
-    if (categories[i] === selectedValue) o.selected = true;
-    s.appendChild(o);
-  }
-  return s;
-}
-
 function renderManageMeals() {
   populateCatDropdowns();
   var list = document.getElementById('meal-list');
@@ -816,126 +800,19 @@ function renderManageMeals() {
   for (var i = 0; i < sorted.length; i++) {
     (function(d) {
       var li = document.createElement('li');
-      renderMealViewRow(li, d);
+      li.innerHTML =
+        '<span class="meal-name">' + esc(d.n) + '</span>' +
+        '<span class="meal-cats">' + d.t.map(esc).join(', ') + '</span>' +
+        '<button class="del-meal" title="Remove">&times;</button>';
+      li.querySelector('.del-meal').onclick = function() {
+        if (!confirm('Remove "' + d.n + '"?')) return;
+        dishes = dishes.filter(function(x){ return x.n !== d.n; });
+        saveState();
+        renderManageMeals();
+      };
       list.appendChild(li);
     })(sorted[i]);
   }
-}
-
-// Render the normal (non-editing) view of a meal row
-function renderMealViewRow(li, d) {
-  li.innerHTML = '';
-  var row = document.createElement('div');
-  row.className = 'meal-row-view';
-
-  var nameSpan = document.createElement('span');
-  nameSpan.className = 'meal-name';
-  nameSpan.textContent = d.n;
-
-  var catsSpan = document.createElement('span');
-  catsSpan.className = 'meal-cats';
-  catsSpan.textContent = d.t.join(', ');
-
-  var editBtn = document.createElement('button');
-  editBtn.className = 'btn-edit-meal';
-  editBtn.textContent = 'Edit';
-  editBtn.onclick = function() { renderMealEditRow(li, d); };
-
-  var delBtn = document.createElement('button');
-  delBtn.className = 'del-meal';
-  delBtn.title = 'Remove';
-  delBtn.innerHTML = '&times;';
-  delBtn.onclick = function() {
-    if (!confirm('Remove "' + d.n + '"?')) return;
-    dishes = dishes.filter(function(x){ return x.n !== d.n; });
-    saveState();
-    renderManageMeals();
-  };
-
-  row.appendChild(nameSpan);
-  row.appendChild(catsSpan);
-  row.appendChild(editBtn);
-  row.appendChild(delBtn);
-  li.appendChild(row);
-}
-
-// Render the inline edit form for a meal row
-function renderMealEditRow(li, d) {
-  li.innerHTML = '';
-  var form = document.createElement('div');
-  form.className = 'meal-row-edit';
-
-  // Name input
-  var nameInput = document.createElement('input');
-  nameInput.type = 'text';
-  nameInput.value = d.n;
-
-  // Category selects
-  var selectsRow = document.createElement('div');
-  selectsRow.className = 'meal-edit-selects';
-
-  var cat1Sel = buildCatSelect('— category —', d.t[0] || '');
-  var cat2Sel = buildCatSelect('+ 2nd category', d.t[1] || '');
-  selectsRow.appendChild(cat1Sel);
-  selectsRow.appendChild(cat2Sel);
-
-  // Action buttons
-  var actionsRow = document.createElement('div');
-  actionsRow.className = 'meal-edit-actions';
-
-  var saveBtn = document.createElement('button');
-  saveBtn.className = 'btn-edit-save';
-  saveBtn.textContent = 'Save';
-
-  var cancelBtn = document.createElement('button');
-  cancelBtn.className = 'btn-edit-cancel';
-  cancelBtn.textContent = 'Cancel';
-
-  actionsRow.appendChild(saveBtn);
-  actionsRow.appendChild(cancelBtn);
-
-  form.appendChild(nameInput);
-  form.appendChild(selectsRow);
-  form.appendChild(actionsRow);
-  li.appendChild(form);
-
-  nameInput.focus();
-  nameInput.select();
-
-  function doSave() {
-    var newName = nameInput.value.trim();
-    var c1 = cat1Sel.value;
-    var c2 = cat2Sel.value;
-
-    if (!newName) { alert('Meal name cannot be empty.'); nameInput.focus(); return; }
-    if (!c1) { alert('Please choose at least one category.'); cat1Sel.focus(); return; }
-    if (c2 && c2 === c1) { alert('Please choose two different categories.'); cat2Sel.focus(); return; }
-
-    // Check for duplicate name (excluding the meal being edited)
-    var duplicate = dishes.some(function(x){
-      return x.n.toLowerCase() === newName.toLowerCase() && x.n !== d.n;
-    });
-    if (duplicate) { alert('A meal with that name already exists.'); nameInput.focus(); return; }
-
-    // Find and update the dish in the master array
-    for (var i = 0; i < dishes.length; i++) {
-      if (dishes[i].n === d.n) {
-        dishes[i].n = newName;
-        dishes[i].t = c2 ? [c1, c2] : [c1];
-        break;
-      }
-    }
-
-    saveState();
-    renderManageMeals();
-  }
-
-  saveBtn.onclick = doSave;
-  cancelBtn.onclick = function() { renderMealViewRow(li, d); };
-  nameInput.onkeydown = function(e) {
-    if (e.key === 'Enter') doSave();
-    if (e.key === 'Escape') renderMealViewRow(li, d);
-  };
 }
 
 function addMeal() {
@@ -973,12 +850,47 @@ function renderManageCategories() {
 
   for (var i = 0; i < categories.length; i++) {
     (function(cat) {
-      var count = dishes.filter(function(d){ return d.t.indexOf(cat) !== -1; }).length;
+      var mealsInCat = dishes.filter(function(d){ return d.t.indexOf(cat) !== -1; });
+      var count = mealsInCat.length;
+      var isExpanded = !!expandedCats[cat];
+
       var li = document.createElement('li');
 
-      var nameSpan = document.createElement('span');
-      nameSpan.className = 'cat-name-text';
-      nameSpan.textContent = cat;
+      // ── Row header ──
+      var header = document.createElement('div');
+      header.className = 'cat-row-header';
+
+      // Clickable name (expand/collapse)
+      var nameBtn = document.createElement('button');
+      nameBtn.className = 'cat-name-btn';
+      nameBtn.title = isExpanded ? 'Collapse' : 'Click to see meals';
+
+      var arrow = document.createElement('span');
+      arrow.className = 'cat-expand-arrow' + (isExpanded ? ' open' : '');
+      arrow.textContent = '▶';
+
+      var nameText = document.createElement('span');
+      nameText.className = 'cat-name-text-inner';
+      nameText.textContent = cat;
+
+      nameBtn.appendChild(arrow);
+      nameBtn.appendChild(nameText);
+      nameBtn.onclick = (function(c, arrowEl, subEl) {
+        return function() {
+          expandedCats[c] = !expandedCats[c];
+          if (expandedCats[c]) {
+            arrowEl.classList.add('open');
+            subEl.classList.add('open');
+            nameBtn.title = 'Collapse';
+          } else {
+            arrowEl.classList.remove('open');
+            subEl.classList.remove('open');
+            nameBtn.title = 'Click to see meals';
+          }
+          // Re-render sub-list content so it's always fresh when opened
+          if (expandedCats[c]) renderSubList(subEl, c);
+        };
+      })(cat, arrow, null); // sub passed below after creation
 
       var countSpan = document.createElement('span');
       countSpan.className = 'cat-count';
@@ -987,7 +899,6 @@ function renderManageCategories() {
       var renameBtn = document.createElement('button');
       renameBtn.className = 'btn-rename';
       renameBtn.textContent = 'Rename';
-      renameBtn.onclick = function() { startRename(li, cat, nameSpan, renameBtn, countSpan, delBtn); };
 
       var delBtn = document.createElement('button');
       delBtn.className = 'btn-del-cat';
@@ -995,20 +906,141 @@ function renderManageCategories() {
       delBtn.innerHTML = '&times;';
       delBtn.onclick = function() { deleteCategory(cat); };
 
-      li.appendChild(nameSpan);
-      li.appendChild(countSpan);
-      li.appendChild(renameBtn);
-      li.appendChild(delBtn);
+      header.appendChild(nameBtn);
+      header.appendChild(countSpan);
+      header.appendChild(renameBtn);
+      header.appendChild(delBtn);
+
+      renameBtn.onclick = function() { startRename(li, cat, header, renameBtn, countSpan, delBtn); };
+
+      // ── Meal sub-list ──
+      var subList = document.createElement('ul');
+      subList.className = 'cat-meal-sublist' + (isExpanded ? ' open' : '');
+
+      // Fix the closure: now wire up the onclick properly with the real subList
+      nameBtn.onclick = (function(c, arrowEl, subEl) {
+        return function() {
+          expandedCats[c] = !expandedCats[c];
+          if (expandedCats[c]) {
+            arrowEl.classList.add('open');
+            subEl.classList.add('open');
+            nameBtn.title = 'Collapse';
+            renderSubList(subEl, c);
+          } else {
+            arrowEl.classList.remove('open');
+            subEl.classList.remove('open');
+            nameBtn.title = 'Click to see meals';
+          }
+        };
+      })(cat, arrow, subList);
+
+      if (isExpanded) renderSubList(subList, cat);
+
+      li.appendChild(header);
+      li.appendChild(subList);
       list.appendChild(li);
     })(categories[i]);
   }
 
+  // also refresh category dropdowns in meal manager if open
   if (document.getElementById('manage-card').style.display === 'block') {
     populateCatDropdowns();
   }
 }
 
-function startRename(li, oldName, nameSpan, renameBtn, countSpan, delBtn) {
+// Render the meal sub-list for a given category into a <ul> element
+function renderSubList(subEl, cat) {
+  subEl.innerHTML = '';
+  var mealsInCat = dishes.filter(function(d){ return d.t.indexOf(cat) !== -1; });
+  mealsInCat.sort(function(a, b){ return a.n.localeCompare(b.n); });
+
+  if (mealsInCat.length === 0) {
+    var emptyLi = document.createElement('li');
+    emptyLi.innerHTML = '<span class="sub-empty-note">No meals in this category.</span>';
+    subEl.appendChild(emptyLi);
+    return;
+  }
+
+  for (var i = 0; i < mealsInCat.length; i++) {
+    (function(meal, catName, containerEl) {
+      var otherCats = meal.t.filter(function(t){ return t !== catName; });
+
+      var li = document.createElement('li');
+
+      var nameSpan = document.createElement('span');
+      nameSpan.className = 'sub-meal-name';
+      nameSpan.textContent = meal.n;
+
+      var otherSpan = document.createElement('span');
+      otherSpan.className = 'sub-meal-othercats';
+      otherSpan.textContent = otherCats.length > 0 ? 'also: ' + otherCats.join(', ') : 'only category';
+
+      var untagBtn = document.createElement('button');
+      untagBtn.className = 'btn-untag';
+      untagBtn.title = 'Remove from this category';
+      untagBtn.innerHTML = '&times;';
+      untagBtn.onclick = function() { untagMealFromCategory(meal.n, catName, containerEl); };
+
+      li.appendChild(nameSpan);
+      li.appendChild(otherSpan);
+      li.appendChild(untagBtn);
+      subEl.appendChild(li);
+    })(mealsInCat[i], cat, subEl);
+  }
+}
+
+// Remove a meal from a single category; if it's the last category, ask what to do
+function untagMealFromCategory(mealName, catName, subEl) {
+  var dish = null;
+  for (var i = 0; i < dishes.length; i++) {
+    if (dishes[i].n === mealName) { dish = dishes[i]; break; }
+  }
+  if (!dish) return;
+
+  if (dish.t.length === 1) {
+    // Only category — ask user
+    var choice = confirm(
+      '"' + mealName + '" is only in ' + catName + '.\n\n' +
+      'OK = delete the meal entirely\n' +
+      'Cancel = leave it as-is'
+    );
+    if (!choice) return;
+    // Delete the meal entirely
+    dishes = dishes.filter(function(d){ return d.n !== mealName; });
+    saveState();
+    renderCategories();
+    renderManageCategories();
+    if (document.getElementById('manage-card').style.display === 'block') {
+      renderManageMeals();
+    }
+    return;
+  }
+
+  // Has other categories — just remove this tag
+  if (!confirm('Remove "' + mealName + '" from ' + catName + '?')) return;
+  dish.t = dish.t.filter(function(t){ return t !== catName; });
+  saveState();
+
+  // Refresh the sub-list in place (no full re-render needed)
+  renderSubList(subEl, catName);
+
+  // Update the count display in the header
+  var header = subEl.previousSibling;
+  if (header) {
+    var countEl = header.querySelector('.cat-count');
+    if (countEl) {
+      var newCount = dishes.filter(function(d){ return d.t.indexOf(catName) !== -1; }).length;
+      countEl.textContent = newCount + (newCount === 1 ? ' meal' : ' meals');
+    }
+  }
+
+  // Also refresh manage meals if open
+  if (document.getElementById('manage-card').style.display === 'block') {
+    renderManageMeals();
+  }
+}
+
+function startRename(li, oldName, header, renameBtn, countSpan, delBtn) {
   var input = document.createElement('input');
   input.className = 'rename-input';
   input.value = oldName;
@@ -1018,9 +1050,10 @@ function startRename(li, oldName, nameSpan, renameBtn, countSpan, delBtn) {
   okBtn.className = 'btn-rename-ok';
   okBtn.textContent = 'Save';
 
-  li.innerHTML = '';
-  li.appendChild(input);
-  li.appendChild(okBtn);
+  // Replace header contents with rename UI
+  header.innerHTML = '';
+  header.appendChild(input);
+  header.appendChild(okBtn);
   input.focus();
   input.select();
 
@@ -1039,6 +1072,11 @@ function startRename(li, oldName, nameSpan, renameBtn, countSpan, delBtn) {
     }
     var si = sel.indexOf(oldName);
     if (si !== -1) sel[si] = newName;
+    // Transfer expanded state
+    if (expandedCats[oldName]) {
+      expandedCats[newName] = true;
+      delete expandedCats[oldName];
+    }
     saveState();
     renderCategories();
     renderManageCategories();
@@ -1064,6 +1102,7 @@ function deleteCategory(cat) {
     if (dishes[i].t.length === 0) dishes.splice(i, 1);
   }
   sel = sel.filter(function(s){ return s !== cat; });
+  delete expandedCats[cat];
 
   saveState();
   renderCategories();
