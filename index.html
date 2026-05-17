@@ -214,22 +214,37 @@
 
   /* Meal list */
   .meal-list { list-style: none; margin-bottom: 4px; }
-  .meal-list li {
+  .meal-list li.meal-row {
     display: flex;
     align-items: baseline;
     gap: 10px;
     padding: 7px 0;
     border-bottom: 1px solid var(--cream);
     font-size: 0.88rem;
+    flex-wrap: wrap;
   }
-  .meal-list li .meal-name { flex: 1; }
-  .meal-list li .meal-cats {
+  .meal-list li.meal-row .meal-name { flex: 1; min-width: 0; }
+  .meal-list li.meal-row .meal-cats {
     font-size: 0.7rem;
     color: var(--muted);
     font-style: italic;
     flex-shrink: 0;
   }
-  .meal-list li button.del-meal {
+  .meal-list li.meal-row button.btn-edit {
+    background: none;
+    border: 1px solid var(--rule);
+    color: var(--muted);
+    padding: 3px 9px;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    flex-shrink: 0;
+    font-family: Georgia, serif;
+  }
+  .meal-list li.meal-row button.btn-edit:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .meal-list li.meal-row button.del-meal {
     background: none;
     border: none;
     color: var(--rule);
@@ -238,8 +253,72 @@
     padding: 0 4px;
     flex-shrink: 0;
   }
-  .meal-list li button.del-meal:hover { color: var(--danger); }
+  .meal-list li.meal-row button.del-meal:hover { color: var(--danger); }
   .empty-note { font-style: italic; color: var(--muted); font-size: 0.82rem; padding: 8px 0; }
+
+  /* Inline meal edit panel */
+  .meal-list li.meal-edit {
+    list-style: none;
+    background: var(--cream);
+    border-bottom: 1px solid var(--rule);
+    padding: 14px 14px 16px;
+  }
+  .meal-edit .mini-label {
+    margin-top: 6px;
+    margin-bottom: 4px;
+  }
+  .meal-edit .mini-label:first-child { margin-top: 0; }
+  .meal-edit input[type="text"], .meal-edit select {
+    font-family: Georgia, serif;
+    font-size: 0.85rem;
+    border: 1px solid var(--rule);
+    background: white;
+    color: var(--ink);
+    padding: 7px 9px;
+    border-radius: 0;
+    width: 100%;
+  }
+  .meal-edit input[type="text"]:focus, .meal-edit select:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
+  .meal-edit .edit-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+  }
+  .meal-edit .edit-row select {
+    flex: 1;
+    min-width: 110px;
+  }
+  .meal-edit .edit-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .meal-edit .btn-save {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    flex: 1;
+  }
+  .meal-edit .btn-save:active { background: var(--accent-light); }
+  .meal-edit .btn-cancel {
+    background: none;
+    border: 1px solid var(--rule);
+    color: var(--muted);
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    font-style: italic;
+    flex: 1;
+  }
+  .meal-edit .btn-cancel:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
 
   /* ── Category management ── */
   #cat-card {
@@ -439,7 +518,7 @@
 <!-- ── Manage Meals card ── -->
 <div id="manage-card">
   <h2>Manage Meals</h2>
-  <p class="hint" style="margin-bottom:18px;">Add your own meals or remove any meal from the list.</p>
+  <p class="hint" style="margin-bottom:18px;">Add your own meals, edit existing ones, or remove any meal from the list.</p>
 
   <p class="sub-label">Add a new meal</p>
 
@@ -570,6 +649,7 @@ var DEFAULT_DISHES = [
 // ─────────────────────────────────────────────
 var categories = [];   // array of strings, ordered
 var dishes = [];       // array of {n, t, s?, custom?}
+var editingName = null; // name of meal currently being edited (or null)
 
 function loadState() {
   try {
@@ -735,7 +815,10 @@ function togglePanel(which) {
     cats.style.display = 'none';
     btnMeals.classList.toggle('active-mgmt', !open);
     btnCats.classList.remove('active-mgmt');
-    if (!open) renderManageMeals();
+    if (!open) {
+      editingName = null;
+      renderManageMeals();
+    }
   } else {
     var openC = cats.style.display === 'block';
     cats.style.display = openC ? 'none' : 'block';
@@ -747,7 +830,7 @@ function togglePanel(which) {
 }
 
 // ─────────────────────────────────────────────
-//  Manage Meals
+//  Manage Meals — add form
 // ─────────────────────────────────────────────
 function populateCatDropdowns() {
   var sel1 = document.getElementById('new-meal-cat1');
@@ -791,37 +874,188 @@ function setupSourceToggle() {
   };
 }
 
+// ─────────────────────────────────────────────
+//  Manage Meals — list rendering
+// ─────────────────────────────────────────────
 function renderManageMeals() {
   populateCatDropdowns();
   setupSourceToggle();
   var list = document.getElementById('meal-list');
   list.innerHTML = '';
   if (dishes.length === 0) {
-    list.innerHTML = '<li><span class="empty-note">No meals yet.</span></li>';
+    list.innerHTML = '<li class="meal-row"><span class="empty-note">No meals yet.</span></li>';
     return;
   }
   var sorted = dishes.slice().sort(function(a,b){
     return a.n.localeCompare(b.n);
   });
   for (var i = 0; i < sorted.length; i++) {
-    (function(d) {
-      var li = document.createElement('li');
-      var catsAndSource = d.t.slice();
-      var detail = catsAndSource.map(esc).join(', ');
-      if (d.s) detail += ' &middot; ' + esc(d.s);
-      li.innerHTML =
-        '<span class="meal-name">' + esc(d.n) + '</span>' +
-        '<span class="meal-cats">' + detail + '</span>' +
-        '<button class="del-meal" title="Remove">&times;</button>';
-      li.querySelector('.del-meal').onclick = function() {
-        if (!confirm('Remove "' + d.n + '"?')) return;
-        dishes = dishes.filter(function(x){ return x.n !== d.n; });
-        saveState();
-        renderManageMeals();
-      };
-      list.appendChild(li);
-    })(sorted[i]);
+    var d = sorted[i];
+    if (editingName && d.n === editingName) {
+      list.appendChild(buildEditRow(d));
+    } else {
+      list.appendChild(buildMealRow(d));
+    }
   }
+}
+
+function buildMealRow(d) {
+  var li = document.createElement('li');
+  li.className = 'meal-row';
+
+  var detail = d.t.map(esc).join(', ');
+  if (d.s) detail += ' &middot; ' + esc(d.s);
+
+  li.innerHTML =
+    '<span class="meal-name">' + esc(d.n) + '</span>' +
+    '<span class="meal-cats">' + detail + '</span>' +
+    '<button class="btn-edit" type="button">Edit</button>' +
+    '<button class="del-meal" type="button" title="Remove">&times;</button>';
+
+  li.querySelector('.btn-edit').onclick = function() {
+    editingName = d.n;
+    renderManageMeals();
+  };
+  li.querySelector('.del-meal').onclick = function() {
+    if (!confirm('Remove "' + d.n + '"?')) return;
+    dishes = dishes.filter(function(x){ return x.n !== d.n; });
+    saveState();
+    renderManageMeals();
+  };
+
+  return li;
+}
+
+function buildEditRow(d) {
+  var li = document.createElement('li');
+  li.className = 'meal-edit';
+
+  function catOptions(selectedVal, placeholder) {
+    var opts = '<option value="">' + placeholder + '</option>';
+    for (var k = 0; k < categories.length; k++) {
+      var c = categories[k];
+      opts += '<option value="' + esc(c) + '"' + (c === selectedVal ? ' selected' : '') + '>' + esc(c) + '</option>';
+    }
+    return opts;
+  }
+
+  var t1 = d.t[0] || '';
+  var t2 = d.t[1] || '';
+  var t3 = d.t[2] || '';
+
+  // Determine source state — if not one of the fixed options, treat as "Other"
+  var srcVal = d.s || '';
+  var isFixed = (srcVal === 'NYT Cooking' || srcVal === 'Paprika');
+  var srcSelectVal, srcOtherVal;
+  if (!srcVal) {
+    srcSelectVal = 'Paprika'; srcOtherVal = '';
+  } else if (isFixed) {
+    srcSelectVal = srcVal; srcOtherVal = '';
+  } else {
+    srcSelectVal = 'Other'; srcOtherVal = srcVal;
+  }
+
+  li.innerHTML =
+    '<p class="mini-label">Meal name</p>' +
+    '<input type="text" class="edit-name" value="' + esc(d.n) + '" />' +
+
+    '<p class="mini-label">Categories (up to three)</p>' +
+    '<div class="edit-row">' +
+      '<select class="edit-cat1">' + catOptions(t1, '— category —') + '</select>' +
+      '<select class="edit-cat2">' + catOptions(t2, '+ 2nd category') + '</select>' +
+      '<select class="edit-cat3">' + catOptions(t3, '+ 3rd category') + '</select>' +
+    '</div>' +
+
+    '<p class="mini-label">Recipe source</p>' +
+    '<div class="edit-row">' +
+      '<select class="edit-source">' +
+        '<option value="NYT Cooking"' + (srcSelectVal === 'NYT Cooking' ? ' selected' : '') + '>NYT Cooking</option>' +
+        '<option value="Paprika"' + (srcSelectVal === 'Paprika' ? ' selected' : '') + '>Paprika</option>' +
+        '<option value="Other"' + (srcSelectVal === 'Other' ? ' selected' : '') + '>Other</option>' +
+      '</select>' +
+      '<input type="text" class="edit-source-other" placeholder="Source name&hellip;" value="' + esc(srcOtherVal) + '"' +
+        (srcSelectVal === 'Other' ? '' : ' style="display:none;"') + ' />' +
+    '</div>' +
+
+    '<div class="edit-actions">' +
+      '<button type="button" class="btn-save">Save</button>' +
+      '<button type="button" class="btn-cancel">Cancel</button>' +
+    '</div>';
+
+  var srcSel = li.querySelector('.edit-source');
+  var srcOther = li.querySelector('.edit-source-other');
+  srcSel.onchange = function() {
+    if (srcSel.value === 'Other') {
+      srcOther.style.display = '';
+      srcOther.focus();
+    } else {
+      srcOther.style.display = 'none';
+    }
+  };
+
+  li.querySelector('.btn-cancel').onclick = function() {
+    editingName = null;
+    renderManageMeals();
+  };
+
+  li.querySelector('.btn-save').onclick = function() {
+    saveMealEdit(d.n, li);
+  };
+
+  return li;
+}
+
+function saveMealEdit(originalName, li) {
+  var name = li.querySelector('.edit-name').value.trim();
+  var c1 = li.querySelector('.edit-cat1').value;
+  var c2 = li.querySelector('.edit-cat2').value;
+  var c3 = li.querySelector('.edit-cat3').value;
+  var srcChoice = li.querySelector('.edit-source').value;
+  var srcOther = li.querySelector('.edit-source-other').value.trim();
+
+  if (!name) { alert('Please enter a meal name.'); return; }
+  if (!c1)   { alert('Please choose at least one category.'); return; }
+
+  // Validate uniqueness of selected categories
+  var chosen = [c1];
+  if (c2) chosen.push(c2);
+  if (c3) chosen.push(c3);
+  var seen = {};
+  for (var i = 0; i < chosen.length; i++) {
+    if (seen[chosen[i]]) { alert('Please choose different categories — no duplicates.'); return; }
+    seen[chosen[i]] = true;
+  }
+
+  // Resolve source
+  var source;
+  if (srcChoice === 'Other') {
+    if (!srcOther) { alert('Please enter a source name, or pick NYT Cooking or Paprika.'); return; }
+    source = srcOther;
+  } else {
+    source = srcChoice;
+  }
+
+  // Check duplicate name (unless it's the original)
+  if (name.toLowerCase() !== originalName.toLowerCase()) {
+    var duplicate = dishes.some(function(d){ return d.n.toLowerCase() === name.toLowerCase(); });
+    if (duplicate) { alert('A meal with that name already exists.'); return; }
+  }
+
+  // Find and update the dish
+  for (var j = 0; j < dishes.length; j++) {
+    if (dishes[j].n === originalName) {
+      dishes[j].n = name;
+      dishes[j].t = chosen;
+      dishes[j].s = source;
+      break;
+    }
+  }
+
+  if (lastPick === originalName) lastPick = name;
+
+  saveState();
+  editingName = null;
+  renderManageMeals();
 }
 
 function addMeal() {
@@ -841,7 +1075,6 @@ function addMeal() {
   if (!name) { alert('Please enter a meal name.'); nameEl.focus(); return; }
   if (!c1)   { alert('Please choose at least one category.'); cat1El.focus(); return; }
 
-  // Validate uniqueness of selected categories
   var chosen = [c1];
   if (c2) chosen.push(c2);
   if (c3) chosen.push(c3);
@@ -851,7 +1084,6 @@ function addMeal() {
     seen[chosen[i]] = true;
   }
 
-  // Resolve source
   var source;
   if (srcChoice === 'Other') {
     source = srcOtherEl.value.trim();
@@ -888,7 +1120,6 @@ function renderManageCategories() {
       var count = dishes.filter(function(d){ return d.t.indexOf(cat) !== -1; }).length;
       var li = document.createElement('li');
 
-      // normal view
       var nameSpan = document.createElement('span');
       nameSpan.className = 'cat-name-text';
       nameSpan.textContent = cat;
@@ -916,7 +1147,6 @@ function renderManageCategories() {
     })(categories[i]);
   }
 
-  // also refresh category dropdowns in meal manager if open
   if (document.getElementById('manage-card').style.display === 'block') {
     populateCatDropdowns();
   }
@@ -945,15 +1175,12 @@ function startRename(li, oldName, nameSpan, renameBtn, countSpan, delBtn) {
     if (categories.indexOf(newName) !== -1) {
       alert('A category named "' + newName + '" already exists.'); input.focus(); return;
     }
-    // Update category list
     var idx = categories.indexOf(oldName);
     if (idx !== -1) categories[idx] = newName;
-    // Update all dishes
     for (var i = 0; i < dishes.length; i++) {
       var ti = dishes[i].t.indexOf(oldName);
       if (ti !== -1) dishes[i].t[ti] = newName;
     }
-    // Update selection state
     var si = sel.indexOf(oldName);
     if (si !== -1) sel[si] = newName;
     saveState();
@@ -976,12 +1203,10 @@ function deleteCategory(cat) {
   if (!confirm(msg)) return;
 
   categories = categories.filter(function(c){ return c !== cat; });
-  // Strip tag from dishes; remove dish if it would have no categories
   for (var i = dishes.length - 1; i >= 0; i--) {
     dishes[i].t = dishes[i].t.filter(function(t){ return t !== cat; });
     if (dishes[i].t.length === 0) dishes.splice(i, 1);
   }
-  // Remove from selection
   sel = sel.filter(function(s){ return s !== cat; });
 
   saveState();
