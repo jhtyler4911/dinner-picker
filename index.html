@@ -557,7 +557,7 @@
 <!-- ── Manage Categories card ── -->
 <div id="cat-card">
   <h2>Manage Categories</h2>
-  <p class="hint" style="margin-bottom:18px;">Add new categories, rename existing ones, or delete empty ones.</p>
+  <p class="hint" style="margin-bottom:18px;">Add new categories, rename existing ones, or delete empty ones. Categories are always shown alphabetically.</p>
 
   <p class="sub-label">Existing categories</p>
   <ul class="cat-list" id="cat-list"></ul>
@@ -647,15 +647,25 @@ var DEFAULT_DISHES = [
 // ─────────────────────────────────────────────
 //  State — loaded from / saved to localStorage
 // ─────────────────────────────────────────────
-var categories = [];   // array of strings, ordered
+var categories = [];   // array of strings, always sorted alphabetically
 var dishes = [];       // array of {n, t, s?, custom?}
 var editingName = null; // name of meal currently being edited (or null)
+
+// Alphabetical sort helper (case-insensitive, locale-aware)
+function sortCategories() {
+  categories.sort(function(a, b) {
+    return a.localeCompare(b, undefined, {sensitivity: 'base'});
+  });
+}
 
 function loadState() {
   try {
     var savedCats = localStorage.getItem('dp_categories');
     categories = savedCats ? JSON.parse(savedCats) : DEFAULT_CATEGORIES.slice();
   } catch(e) { categories = DEFAULT_CATEGORIES.slice(); }
+
+  // Always sort categories on load (catches any pre-existing out-of-order data)
+  sortCategories();
 
   try {
     var savedDishes = localStorage.getItem('dp_dishes');
@@ -943,7 +953,6 @@ function buildEditRow(d) {
   var t2 = d.t[1] || '';
   var t3 = d.t[2] || '';
 
-  // Determine source state — if not one of the fixed options, treat as "Other"
   var srcVal = d.s || '';
   var isFixed = (srcVal === 'NYT Cooking' || srcVal === 'Paprika');
   var srcSelectVal, srcOtherVal;
@@ -1016,7 +1025,6 @@ function saveMealEdit(originalName, li) {
   if (!name) { alert('Please enter a meal name.'); return; }
   if (!c1)   { alert('Please choose at least one category.'); return; }
 
-  // Validate uniqueness of selected categories
   var chosen = [c1];
   if (c2) chosen.push(c2);
   if (c3) chosen.push(c3);
@@ -1026,7 +1034,6 @@ function saveMealEdit(originalName, li) {
     seen[chosen[i]] = true;
   }
 
-  // Resolve source
   var source;
   if (srcChoice === 'Other') {
     if (!srcOther) { alert('Please enter a source name, or pick NYT Cooking or Paprika.'); return; }
@@ -1035,13 +1042,11 @@ function saveMealEdit(originalName, li) {
     source = srcChoice;
   }
 
-  // Check duplicate name (unless it's the original)
   if (name.toLowerCase() !== originalName.toLowerCase()) {
     var duplicate = dishes.some(function(d){ return d.n.toLowerCase() === name.toLowerCase(); });
     if (duplicate) { alert('A meal with that name already exists.'); return; }
   }
 
-  // Find and update the dish
   for (var j = 0; j < dishes.length; j++) {
     if (dishes[j].n === originalName) {
       dishes[j].n = name;
@@ -1183,6 +1188,10 @@ function startRename(li, oldName, nameSpan, renameBtn, countSpan, delBtn) {
     }
     var si = sel.indexOf(oldName);
     if (si !== -1) sel[si] = newName;
+
+    // Re-sort after rename so the renamed category lands in its new alphabetical spot
+    sortCategories();
+
     saveState();
     renderCategories();
     renderManageCategories();
@@ -1203,6 +1212,7 @@ function deleteCategory(cat) {
   if (!confirm(msg)) return;
 
   categories = categories.filter(function(c){ return c !== cat; });
+  // categories was already sorted; filter preserves order, so no re-sort needed
   for (var i = dishes.length - 1; i >= 0; i--) {
     dishes[i].t = dishes[i].t.filter(function(t){ return t !== cat; });
     if (dishes[i].t.length === 0) dishes.splice(i, 1);
@@ -1223,6 +1233,10 @@ function addCategory() {
   if (!name) { alert('Please enter a category name.'); input.focus(); return; }
   if (categories.indexOf(name) !== -1) { alert('"' + name + '" already exists.'); input.focus(); return; }
   categories.push(name);
+
+  // Sort so the new category lands in its proper alphabetical slot
+  sortCategories();
+
   saveState();
   input.value = '';
   renderCategories();
