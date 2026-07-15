@@ -1,0 +1,21 @@
+{
+  "name": "Dinner Picker",
+  "short_name": "Dinner Picker",
+  "description": "Pick tonight's dinner from your family's recipe list.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f5f0e8",
+  "theme_color": "#8b3a2a",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
